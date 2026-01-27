@@ -13,7 +13,8 @@
 - [Overview](#overview)
 - [Required Parameters](#required-parameters)
 - [GET Requests](#get-requests)
-  - [Get Conversations](#get-conversations)
+  - [Get All Conversations](#get-all-conversations)
+  - [Get Single Conversation](#get-single-conversation)
 - [PUT Requests](#put-requests)
   - [Add Message](#add-message)
 
@@ -35,7 +36,7 @@ The Conversations API provides storage and retrieval of chat message history. Th
 
 ## GET Requests
 
-### Get Conversations
+### Get All Conversations
 
 Retrieve all stored conversations for the authenticated user.
 
@@ -43,6 +44,30 @@ Retrieve all stored conversations for the authenticated user.
 
 ```http
 GET /WorldClientAPI/conversations?session={session_id}
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `before` | string | No | ISO-8601 timestamp; filters messages to only include those with timestamps on or before this time |
+| `limit` | integer | No | Maximum number of messages to return per conversation |
+
+**Behavior**
+
+- When `before` is specified, each conversation's messages array is filtered to only include messages with timestamps on or before the specified time
+- When `limit` is specified, each conversation's messages array is limited to the most recent N messages
+
+**Example: Get Conversations with Message Filtering**
+
+```http
+GET /WorldClientAPI/conversations?session={session_id}&before=2025-01-20T10:00:00-05:00
+```
+
+**Example: Get Conversations with Limited Messages Per Conversation**
+
+```http
+GET /WorldClientAPI/conversations?session={session_id}&limit=50
 ```
 
 **Success Response**
@@ -94,6 +119,80 @@ GET /WorldClientAPI/conversations?session={session_id}
 
 | Status | Error | Description |
 |--------|-------|-------------|
+| 400 | `InvalidParameter` | Invalid ISO-8601 format for `before` parameter |
+| 401 | `Unauthorized` | Invalid session |
+| 403 | `InadequatePermissions` | User access denied |
+
+---
+
+### Get Single Conversation
+
+Retrieve a specific conversation by JID with optional message limiting and pagination.
+
+**Example Request**
+
+```http
+GET /WorldClientAPI/conversations?session={session_id}&jid={jid}
+```
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `jid` | string | Yes | Jabber ID of the conversation to retrieve |
+| `limit` | integer | No | Maximum number of messages to return |
+| `before` | string | No | ISO-8601 timestamp; returns messages before this time 
+
+**Behavior**
+
+- When `jid` is provided, returns a single conversation object instead of the full conversations array
+- When `limit` is specified without `before`, returns the most recent N messages
+- When both `limit` and `before` are specified, returns up to N messages with timestamps before the specified time
+- When `before` is specified without `limit`, returns only messages with timestamps
+before or at the specified time
+
+**Example: Get Conversation with Limited Messages**
+
+```http
+GET /WorldClientAPI/conversations?session={session_id}&jid=contact@example.com&limit=50
+```
+
+**Example: Get Older Messages (Pagination)**
+
+```http
+GET /WorldClientAPI/conversations?session={session_id}&jid=contact@example.com&limit=50&before=2025-01-20T10:00:00-05:00
+```
+
+**Success Response**
+
+```json
+{
+  "conversation": {
+    "jid": string,
+    "type": string,
+    "lastMessageTime": string,
+    "messages": [
+      {
+        "id": string,
+        "from": string,
+        "to": string,
+        "body": string,
+        "timestamp": string,
+        "type": string,
+        "direction": string
+      }
+    ]
+  }
+}
+```
+
+**Error Responses**
+
+| Status | Error | Description |
+|--------|-------|-------------|
+| 400 | `MissingParameter` | `jid` parameter is empty |
+| 400 | `InvalidParameter` | No conversation found with the specified JID |
+| 400 | `InvalidParameter` | Invalid ISO-8601 format for `before` parameter |
 | 401 | `Unauthorized` | Invalid session |
 | 403 | `InadequatePermissions` | User access denied |
 
