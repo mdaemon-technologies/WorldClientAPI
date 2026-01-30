@@ -937,6 +937,7 @@ GET /WorldClientAPI/compose/new/attach_audio/{calendar_folder_id}/{filename}?ses
 | deferred_delivery | string | ISO-8601 Date YYYY-MM-DDTHH:mm+/-HH:mm * |
 | subject | string | Subject line |
 | body | string | HTML string |
+| body_plain | string | Plain text version of the message body (used when HTML compose is enabled) |
 
 > **Note:** The Deferred Delivery feature must be enabled on the server in order for this value to be used. The date is when the message delivery should be delayed until. It will not impact the Date header of the message, which most clients use to describe when a message was sent.
 
@@ -1122,6 +1123,7 @@ POST /WorldClientAPI/compose/attachment/signature?session={session_id}
 | deferred_delivery | string | ISO-8601 Date YYYY-MM-DDTHH:mm+/-HH:mm |
 | subject | string | Subject line |
 | body | string | HTML string |
+| body_plain | string | Plain text version of the message body (used when HTML compose is enabled) |
 
 **Success Response**
 
