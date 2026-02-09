@@ -284,7 +284,8 @@ GET /WorldClientAPI/messages/{folder_id}/page/{page_number}?session={session_id}
   "sort_column": string,
   "sort_ascending": boolean,
   "page": number,
-  "pages": number
+  "pages": number,
+  "total": number
 }
 ```
 
@@ -296,6 +297,7 @@ GET /WorldClientAPI/messages/{folder_id}/page/{page_number}?session={session_id}
 | `sort_ascending` | boolean | Sort order |
 | `page` | number | Current page number |
 | `pages` | number | Total number of pages |
+| `total` | number | Total number of messages
 
 The `messages` array contains message objects like Single Message but **without**: `remote_images_blocked`, `hyper_links_disabled`, `body`, `attachments`, `permissions`.
 
