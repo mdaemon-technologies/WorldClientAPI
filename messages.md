@@ -233,7 +233,11 @@ GET /WorldClientAPI/messages/{folder_id}/message/{message_id}?session={session_i
 
 **Success Response** - `200 OK`
 
-Returns the same structure as [Single Message](#single-message).
+Returns the same structure as [Single Message](#single-message), with the following additional field:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `next_unread_page` | number | The page number containing the next unread message. Only present when a next unread message is found. |
 
 **Error Response**
 
