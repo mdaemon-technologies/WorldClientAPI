@@ -1680,9 +1680,20 @@ PUT /WorldClientAPI/settings?session={session_id}&alias_displayname=1
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
-| `{setting1}` | string | Value for setting1 |
-| `{setting2}` | string | Value for setting2 |
-| `{setting3}` | string | Value for setting3 |
+| `{setting1}` | string or number | Value for setting1 |
+| `{setting2}` | string or number | Value for setting2 |
+| `{setting3}` | string or number | Value for setting3 |
+
+> **Note:** Setting values can be strings or integers. Integer values sent in the JSON request body are automatically converted and stored.
+
+**Request Body**
+
+```json
+{
+  "{setting1}": "string value",
+  "{setting2}": 123
+}
+```
 
 **Response (Success)**
 
