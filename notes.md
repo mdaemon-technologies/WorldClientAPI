@@ -130,7 +130,8 @@ GET /WorldClientAPI/notes/{folder_id}/note/{note_id}?session={session_id}
     "sort_column": string,
     "sort_ascending": boolean,
     "page": number, // current page
-    "pages": number // total pages
+    "pages": number, // total pages
+    "total": number // total number of notes
 }
 ```
 

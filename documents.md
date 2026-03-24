@@ -136,7 +136,8 @@ GET /WorldClientAPI/documents/{folder_id}/page/{page_number}?session={session_id
   "sort_column": string,
   "sort_ascending": boolean,
   "page": number,
-  "pages": number
+  "pages": number,
+  "total": number
 }
 ```
 
@@ -148,6 +149,7 @@ GET /WorldClientAPI/documents/{folder_id}/page/{page_number}?session={session_id
 | `sort_ascending` | boolean | Sort direction |
 | `page` | number | Current page number |
 | `pages` | number | Total number of pages |
+| `total` | number | Total number of documents |
 
 ---
 

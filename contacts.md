@@ -270,7 +270,8 @@ GET /WorldClientAPI/contacts/{address_book_name}/contact/{contact_id}?session={s
   "sort_column": "string",
   "sort_ascending": true,
   "page": 1,
-  "pages": 10
+  "pages": 10,
+  "total": 100
 }
 ```
 
@@ -339,7 +340,8 @@ The differences between an autocomplete response and a regular get contacts resp
   "sort_column": "string",
   "sort_ascending": true,
   "page": 1,
-  "pages": 10
+  "pages": 10,
+  "total": 100
 }
 ```
 
@@ -462,7 +464,8 @@ To change the sort order and sort column, include these parameters with any GET 
   "sort_column": "string",
   "sort_ascending": true,
   "page": 1,
-  "pages": 10
+  "pages": 10,
+  "total": 100
 }
 ```
 

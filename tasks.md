@@ -261,7 +261,8 @@ GET /WorldClientAPI/tasks/{folder_id}/task/{task_id}?session={session_id}
     "sort_column": string,
     "sort_ascending": boolean,
     "page": number,
-    "pages": number
+    "pages": number,
+    "total": number
 }
 ```
 
@@ -273,6 +274,7 @@ GET /WorldClientAPI/tasks/{folder_id}/task/{task_id}?session={session_id}
 | sort_ascending | boolean | Sort direction |
 | page | number | Current page |
 | pages | number | Total pages |
+| total | number | Total number of tasks |
 
 `tasks` is filled with task objects like above minus the following properties:
 
