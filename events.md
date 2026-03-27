@@ -21,6 +21,7 @@ Manage calendar events, recurring events, external calendar links, and published
 - [Published Calendar](#published-calendar)
 - [Published Schedule](#published-schedule)
 - [Download Attachment](#download-attachment)
+- [Download Event ICS File](#download-event-ics-file)
 
 ### POST Requests
 - [Upload Attachment](#upload-attachment)
@@ -611,6 +612,41 @@ or
 
 ```http
 GET /WorldClientAPI/events/{folder_id}/event/{event_id}/attachment/{attachment_id}?session={session_id}
+```
+
+---
+
+### Download Event ICS File
+
+Download a single event as an `event.ics` file. Unlike the [Private Access Link](#private-access-link) which provides a URL to an entire calendar, this endpoint downloads the ICS data for one specific event only.
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | number | Yes | The event ID |
+| `ical` | number | Yes | Must be `1` |
+
+**Success Response**
+
+Download begins (`event.ics` file).
+
+**Failure Response**
+
+- `401 Unauthorized`
+- `404 Not Found`
+- `500 Internal Server Error`
+
+**Example Request**
+
+```http
+POST /WorldClientAPI?session={session_id}&route=events&folder={folder_id}&id={event_id}&ical=1
+```
+
+or
+
+```http
+POST /WorldClientAPI/events/{folder_id}/event/{event_id}/ical?session={session_id}
 ```
 
 ---
