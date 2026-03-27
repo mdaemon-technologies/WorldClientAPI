@@ -160,6 +160,12 @@ fetch("/WorldClientAPI/messages/1", {
 - Added cloud storage integration routes (Dropbox, Google Drive, OneDrive) — [cloud-storage](cloud-storage.md)
 - Added conversation history storage — [conversations](conversations.md)
 - Added ping keep-alive endpoint — [ping](ping.md)
+- Added single event ICS file download via `ical` parameter — [events](events.md#download-event-ics-file)
+- Added `total` property to message list response — [messages](messages.md)
+- Added `total` property to contact list response — [contacts](contacts.md)
+- Added `total` property to task list response — [tasks](tasks.md)
+- Added `total` property to note list response — [notes](notes.md)
+- Added `total` property to document list response — [documents](documents.md)
 
 ### Version 3.4
 
