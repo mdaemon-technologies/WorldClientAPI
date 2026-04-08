@@ -26,6 +26,7 @@ Manage contacts including create, read, update, delete operations, vCard import/
   - [Company Departments](#company-departments)
   - [Department Contacts](#department-contacts)
   - [Out of Office Status](#out-of-office-status)
+  - [LDAP Address Books](#ldap-address-books)
   - [Contacts Pictures](#contacts-pictures)
 - [POST Requests](#post-requests)
   - [Upload Attachment](#upload-attachment)
@@ -887,6 +888,48 @@ Information regarding the status of a user's Autoresponder.
 GET /WorldClientAPI?session={session_id}&route=contacts&is_autoresponder_enabled=1&contact={contact_email_address}
 
 GET /WorldClientAPI/contacts/is_autoresponder_enabled?contact={contact_email_address}
+```
+
+---
+
+### LDAP Address Books
+
+<!-- CHANGE: 2026-04-08 - Added LDAP address books endpoint documentation -->
+
+Returns the list of configured LDAP address book names available to the current user. The address book names are read from the server's `AddrLookup.ini` configuration file.
+
+> **Note:** This endpoint does not require `folder` or `address_book` parameters.
+
+**Parameters**
+
+None
+
+**Response - Success**
+
+```json
+{
+  "ldap": [
+    "string"
+  ]
+}
+```
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `ldap` | array of strings | Names of the configured LDAP address books |
+
+**Response - Failure**
+
+```json
+{
+  "error": "string"
+}
+```
+
+**Example Requests**
+
+```http
+GET /WorldClientAPI/contacts/LDAP?session={session_id}
 ```
 
 ---
