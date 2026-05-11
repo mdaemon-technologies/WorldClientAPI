@@ -640,13 +640,13 @@ Download begins (`event.ics` file).
 **Example Request**
 
 ```http
-POST /WorldClientAPI?session={session_id}&route=events&folder={folder_id}&id={event_id}&ical=1
+GET /WorldClientAPI?session={session_id}&route=events&folder={folder_id}&id={event_id}&ical=1
 ```
 
 or
 
 ```http
-POST /WorldClientAPI/events/{folder_id}/event/{event_id}/ical?session={session_id}
+GET /WorldClientAPI/events/{folder_id}/event/{event_id}/ical?session={session_id}
 ```
 
 ---

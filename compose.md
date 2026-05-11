@@ -385,9 +385,9 @@ GET /WorldClientAPI/compose/new/forward_attachment/{folder_id}/ids?session={sess
 
 **Parameters**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| draft | number | The id of the message in the Drafts folder |
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| draft | number | Yes | The id of the message in the Drafts folder |
 
 **Success Response**
 
