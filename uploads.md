@@ -76,7 +76,7 @@ xhr.send(data);
 
 ## Compose Attachments
 
-Uploading attachments to a message being composed is the same as in [PIM Attachments](#pim-attachments): the form field name must begin with `Attachment`. A file sent under any other field name is not attached; check the `attachments` list in the response.
+Uploading attachments to a message being composed is the same as in [PIM Attachments](#pim-attachments): the form field name must begin with `Attachment`. A request with a file under `file` or `upload` is refused with `UploadRefused`, and nothing in it is attached.
 
 ```javascript
 let data = new FormData();
@@ -94,7 +94,7 @@ xhr.send(data);
 
 **Inline Images**
 
-An inline image is the exception: its form field name must be `file` or `upload` (lower case, not `Attachment`), and it goes to the `attachment/inline` route. Send one image per request; the response carries its URL.
+An inline image is the exception: its form field name must be `file` or `upload` (lower case, not `Attachment`), and it goes to the `attachment/inline` route. A request with a file under an `Attachment` field is refused there with `UploadRefused`. Send one image per request; the response carries its URL.
 
 ```javascript
 let data = new FormData();

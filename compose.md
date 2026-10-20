@@ -989,7 +989,9 @@ POST /WorldClientAPI/compose/{compose_id}/send?session={session_id}
 
 Upload one or more files as `multipart/form-data`, one part per file. Name each part's form field `Attachment` or `Attachment:{n}` (any name beginning with `Attachment`, except `Attachments`) and give each part a `filename`. The part's `Content-Type` becomes the attachment's MIME type; when it is missing or `application/octet-stream`, the type is taken from the file extension. For details go to the [Uploads](uploads.md) page.
 
-A file sent under any other field name is not attached and is not in the returned `attachments` list. That includes `file` and `upload`, which are the field names for an inline image (see [Upload Inline Image](#upload-inline-image)). Check the returned list to confirm that each file was attached.
+A request with a file under `file` or `upload`, the field names for an inline image (see [Upload Inline Image](#upload-inline-image)), is refused with `UploadRefused`, `parameter` names that field, and nothing in the request is attached. A part under any other name is not read as a file, and a request with no file in it returns `UploadRefused`.
+
+If a file is not attached, for example because the virus scan deleted it, the response still lists the attachments that were attached and `error` says why: the virus scan's message, or `UploadRefused`.
 
 **Parameters**
 
@@ -1060,7 +1062,7 @@ Content-Type: text/plain
 
 ### Upload Inline Image
 
-Upload the image as `multipart/form-data` with the form field named `file` or `upload` (lower case) and a `filename`. The part's `Content-Type` must begin with `image/`; any other type returns `ContentBlocked`. Under any other field name, including `Attachment`, the image is not inline and the request returns `UploadRefused`. Send one image per request: the response carries the URL of the last image only.
+Upload the image as `multipart/form-data` with the form field named `file` or `upload` (lower case) and a `filename`. The part's `Content-Type` must begin with `image/`; any other type returns `ContentBlocked`. A request with a file under an `Attachment` field is refused with `UploadRefused`, `parameter` names that field, and nothing in the request is attached; under any other name the part is not read as a file, and a request with no file in it returns `UploadRefused`. Send one image per request: the response carries the URL of the last image only. If the image is not attached, for example because the virus scan deleted it, the response has no `url` and `error` says why: the virus scan's message, or `UploadRefused`.
 
 **Parameters**
 
@@ -1406,5 +1408,7 @@ DELETE /WorldClientAPI/compose/{compose_id}/draft?session={session_id}
 | InvalidRequest | There were invalid parameters in the request |
 | MissingParameter | There were parameters missing from the request |
 | InvalidAction | The requested action could not be completed on the item |
-| UploadRefused | No usable file was uploaded: none was sent, or none under a field name the request accepts |
+| UploadRefused | An upload was not accepted: no file was sent, a file was under a field name the request does not accept (`parameter` names it), or a file could not be stored |
 | ContentBlocked | The uploaded file type is not allowed for this request, such as a file that is not an image sent as an inline image |
+
+When the virus scan deletes an uploaded file, `error` is the scan's message, written for the user, rather than one of the codes above.
