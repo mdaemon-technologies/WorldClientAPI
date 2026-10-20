@@ -62,6 +62,7 @@
 ```json
 {
     "id": number,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -79,6 +80,7 @@
 | Field | Type | Description |
 |-------|------|-------------|
 | id | number | `{compose_id}` |
+| from | number | Index into `from_addresses` of the address to send from, resolved from the user's **Default From Address** setting. `0` when the setting is unset |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -123,6 +125,7 @@ The value of `reply` is the id of the message you are replying to.
     "id": number,
     "to": string,
     "subject": string,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -142,6 +145,7 @@ The value of `reply` is the id of the message you are replying to.
 | id | number | `{compose_id}` |
 | to | string | The reply-to address header of the message being replied to |
 | subject | string | Subject line |
+| from | number | Index into `from_addresses` of the address to send from: the alias the original message was sent to. Otherwise the user's **Default From Address on Reply** setting; with that unset, the primary address when the message was sent to it, or the **Default From Address** when it was sent to none of the user's addresses |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -187,6 +191,7 @@ The value of `reply_all` is the id of the message you are replying to.
     "to": string,
     "cc": string,
     "subject": string,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -207,6 +212,7 @@ The value of `reply_all` is the id of the message you are replying to.
 | to | string | The comma delimited list of from, to, and cc address headers excluding the user's address |
 | cc | string | Only present if there were addresses in the cc of the message being replied to |
 | subject | string | Subject line |
+| from | number | Index into `from_addresses` of the address to send from: the alias the original message was sent to. Otherwise the user's **Default From Address on Reply** setting; with that unset, the primary address when the message was sent to it, or the **Default From Address** when it was sent to none of the user's addresses |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -250,6 +256,7 @@ The value of `forward` is the id of the message you are forwarding.
 {
     "id": number,
     "subject": string,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -276,6 +283,7 @@ The value of `forward` is the id of the message you are forwarding.
 |-------|------|-------------|
 | id | number | `{compose_id}` |
 | subject | string | Subject line |
+| from | number | Index into `from_addresses` of the address to send from: the alias the original message was sent to. Otherwise the user's **Default From Address on Forward** setting; with that unset, the primary address when the message was sent to it, or the **Default From Address** when it was sent to none of the user's addresses |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -323,6 +331,7 @@ GET /WorldClientAPI/compose/new/forward/{folder_id}/{message_id}?session={sessio
 {
     "id": number,
     "subject": string,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -349,6 +358,7 @@ GET /WorldClientAPI/compose/new/forward/{folder_id}/{message_id}?session={sessio
 |-------|------|-------------|
 | id | number | `{compose_id}` |
 | subject | string | Subject line |
+| from | number | Index into `from_addresses` of the address to send from: the alias the original message was sent to. Otherwise the user's **Default From Address on Forward** setting; with that unset, the primary address when the message was sent to it, or the **Default From Address** when it was sent to none of the user's addresses |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | body | string | A selected signature will be included here |
@@ -437,7 +447,7 @@ GET /WorldClientAPI/compose/new/forward_attachment/{folder_id}/ids?session={sess
 | confirm_delivery | boolean | Request delivery confirmation |
 | confirm_read | boolean | Request read confirmation |
 | urgent | boolean | Mark as urgent |
-| from | number | Index of from option chosen by user |
+| from | number | Index into `from_addresses` of the From address saved with the draft. The Default From Address settings are not applied to a draft |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
 | body | string | A selected signature will be included here |
@@ -486,6 +496,7 @@ GET /WorldClientAPI/compose/draft/{message_id}?session={session_id}
 ```json
 {
     "id": number,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -511,6 +522,7 @@ GET /WorldClientAPI/compose/draft/{message_id}?session={session_id}
 | Field | Type | Description |
 |-------|------|-------------|
 | id | number | Compose ID |
+| from | number | Index into `from_addresses` of the address to send from, resolved from the user's **Default From Address** setting. `0` when the setting is unset |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -708,6 +720,7 @@ GET /WorldClientAPI/compose/{compose_id}/attachment/{attachment_id}?session={ses
 ```json
 {
     "id": number,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -733,6 +746,7 @@ GET /WorldClientAPI/compose/{compose_id}/attachment/{attachment_id}?session={ses
 | Field | Type | Description |
 |-------|------|-------------|
 | id | number | Compose ID |
+| from | number | Index into `from_addresses` of the address to send from, resolved from the user's **Default From Address** setting. `0` when the setting is unset |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -783,6 +797,7 @@ GET /WorldClientAPI/compose/new/attach_contact/{contact_folder_id}/ids?session={
 ```json
 {
     "id": number,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -808,6 +823,7 @@ GET /WorldClientAPI/compose/new/attach_contact/{contact_folder_id}/ids?session={
 | Field | Type | Description |
 |-------|------|-------------|
 | id | number | Compose ID |
+| from | number | Index into `from_addresses` of the address to send from, resolved from the user's **Default From Address** setting. `0` when the setting is unset |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -857,6 +873,7 @@ If you have a voice recording from the `record` route, you can attach it to a ne
 ```json
 {
     "id": number,
+    "from": number,
     "from_addresses": [
         string,
         string
@@ -882,6 +899,7 @@ If you have a voice recording from the `record` route, you can attach it to a ne
 | Field | Type | Description |
 |-------|------|-------------|
 | id | number | Compose ID |
+| from | number | Index into `from_addresses` of the address to send from, resolved from the user's **Default From Address** setting. `0` when the setting is unset |
 | from_addresses | string[] | Primary address plus aliases user can send from |
 | reply_to | string | Default Reply-To address |
 | max_attachment_size | number | Maximum size of an attachment in bytes |
@@ -969,13 +987,17 @@ POST /WorldClientAPI/compose/{compose_id}/send?session={session_id}
 
 ### Upload Attachment
 
+Upload one or more files as `multipart/form-data`, one part per file. Name each part's form field `Attachment` or `Attachment:{n}` (any name beginning with `Attachment`, except `Attachments`) and give each part a `filename`. The part's `Content-Type` becomes the attachment's MIME type; when it is missing or `application/octet-stream`, the type is taken from the file extension. For details go to the [Uploads](uploads.md) page.
+
+A file sent under any other field name is not attached and is not in the returned `attachments` list. That includes `file` and `upload`, which are the field names for an inline image (see [Upload Inline Image](#upload-inline-image)). Check the returned list to confirm that each file was attached.
+
 **Parameters**
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | id | number | `{compose_id}` |
 | attachment | number | `1` |
-| upload | number | `1` (deprecated) |
+| upload | number | `1` (deprecated alias for `attachment`; a URL parameter, not a form field name) |
 
 **Success Response**
 
@@ -1016,11 +1038,29 @@ POST /WorldClientAPI?session={session_id}&route=compose&attachment=1&id={compose
 POST /WorldClientAPI/compose/{compose_id}/attachment?session={session_id}
 ```
 
+**Example Request Body**
+
+```http
+Content-Type: multipart/form-data; boundary=----boundary
+
+------boundary
+Content-Disposition: form-data; name="Attachment:0"; filename="report.pdf"
+Content-Type: application/pdf
+
+[file contents]
+------boundary
+Content-Disposition: form-data; name="Attachment:1"; filename="notes.txt"
+Content-Type: text/plain
+
+[file contents]
+------boundary--
+```
+
 ---
 
 ### Upload Inline Image
 
-If the attachment mime type is not an image, this request will return an error.
+Upload the image as `multipart/form-data` with the form field named `file` or `upload` (lower case) and a `filename`. The part's `Content-Type` must begin with `image/`; any other type returns `ContentBlocked`. Under any other field name, including `Attachment`, the image is not inline and the request returns `UploadRefused`. Send one image per request: the response carries the URL of the last image only.
 
 **Parameters**
 
@@ -1366,3 +1406,5 @@ DELETE /WorldClientAPI/compose/{compose_id}/draft?session={session_id}
 | InvalidRequest | There were invalid parameters in the request |
 | MissingParameter | There were parameters missing from the request |
 | InvalidAction | The requested action could not be completed on the item |
+| UploadRefused | No usable file was uploaded: none was sent, or none under a field name the request accepts |
+| ContentBlocked | The uploaded file type is not allowed for this request, such as a file that is not an image sent as an inline image |

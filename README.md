@@ -126,7 +126,7 @@ fetch("/WorldClientAPI/messages/1", {
 | [settings](settings.md) | User preferences, app passwords, IMAP filters, autoresponder |
 | [folders](folders.md) | Folder operations, notifications, ACL |
 | [compose](compose.md) | Email composition, signatures, templates |
-| [messages](messages.md) | Message CRUD, threading, search, import/export |
+| [messages](messages.md) | Message CRUD, threading, search, new-message polling, import/export |
 | [contacts](contacts.md) | Contact management, vCard, AutoComplete |
 | [events](events.md) | Calendar events, iCal support, external calendars |
 | [tasks](tasks.md) | Task management |
@@ -154,6 +154,17 @@ fetch("/WorldClientAPI/messages/1", {
 ---
 
 ## Changelog
+
+### Version 3.6
+
+- Added New Messages polling route, which returns only messages that arrived after a
+  given id without altering the session's current folder, search, sort or page, without
+  clearing the folder's new flag, and without rewriting `ListPerPage` —
+  [messages](messages.md#new-messages). Drafts, Sent Items and Deleted Items always
+  return an empty result
+- Added Background Actions route, which performs read, flag, categories, snooze, spam
+  and delete on a folder the user is not viewing without changing the session's current
+  folder, page or search — [messages](messages.md#background-actions)
 
 ### Version 3.5
 

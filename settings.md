@@ -160,6 +160,25 @@ GET /WorldClientAPI?route=settings&session={session_id}&settings=setting1,settin
 GET /WorldClientAPI/settings?session={session_id}&settings=setting1,setting2,setting3
 ```
 
+**Default From Address settings**
+
+`DefaultFromAddress`, `DefaultReplyFromAddress` and `DefaultForwardFromAddress` are
+**written** as an index into the `ComposeFromAddresses` list and **read back** as the
+mailbox that index refers to. An empty value means the setting is unset and the
+primary address is used. Accounts configured before MDaemon 26.0.4 may still read back
+as an index; clients that display these settings should accept both forms.
+
+Clients do not need to apply these settings when composing — the compose route resolves
+them into the `from` index it returns. See [Compose](compose.md).
+
+**Recipient limit**
+
+`MaxRecipients` is read-only and is returned as a **number**: the most recipients one
+message may have, counting every address in To, CC and BCC. `0` means there is no limit,
+which is also what is returned when the domain sends through another SMTP host. The
+server enforces the limit when the message is sent and refuses a send that exceeds it; a
+client reads this setting to tell the user beforehand.
+
 ---
 
 ### Custom Buttons

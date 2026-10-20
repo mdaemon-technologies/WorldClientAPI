@@ -18,6 +18,7 @@
     - [Threaded Messages](#threaded-messages)
   - [All Flagged Messages](#all-flagged-messages)
   - [All Unread Messages](#all-unread-messages)
+  - [New Messages](#new-messages)
   - [All Snoozed Messages](#all-snoozed-messages)
   - [Sort Messages](#sort-messages)
   - [Search Messages](#search-messages)
@@ -37,6 +38,7 @@
   - [Collapse Thread](#collapse-thread)
   - [Categories](#categories)
   - [Snooze](#snooze)
+  - [Background Actions](#background-actions)
   - [Recall](#recall)
   - [Send Read Confirmation](#send-read-confirmation)
   - [Accept Invite](#accept-invite)
@@ -367,6 +369,14 @@ GET /WorldClientAPI/messages/{folder_id}/page/{page_number}?session={session_id}
 
 When [expanding](#expand-thread) or [collapsing](#collapse-thread) a thread, be sure to notify the server.
 
+To find where specific messages sit in the list, for example ones just [imported](#import-messages-to-folder), add an `ids` parameter. Only those messages are returned, in display order, each with a `prev_id` field: the ID of the message displayed immediately before it, or `0` when it is first. IDs that are not displayed (unknown, excluded by the current search, or hidden under a collapsed thread) are omitted. `page`, `pages` and `total` describe the whole list as usual.
+
+**Example Request**
+
+```http
+GET /WorldClientAPI/messages/{folder_id}/page/{page_number}?session={session_id}&ids=[{number},...]
+```
+
 ---
 
 ### All Flagged Messages
@@ -448,6 +458,104 @@ GET /WorldClientAPI/messages/{folder_id}/page/{page_number}/unread?session={sess
 {
   "error": "InvalidParameter",
   "parameter": "status"
+}
+```
+
+---
+
+### New Messages
+
+Retrieve only the messages that have arrived in a folder since the client last
+looked, without disturbing anything else about the session.
+
+This route exists for background polling. Unlike the paged list routes it does
+**not** change the session's current folder, search criteria, sort order or
+current page, it does **not** clear the server's "new" flag on the folder, and
+`limit` does **not** write the user's `ListPerPage` setting. It is therefore safe
+to call for folders the user is not currently viewing while they have another
+folder open.
+
+Pass the highest `id` you already hold for the folder as `since`. Message ids are
+IMAP UIDs: they increase monotonically within a folder and are never reused, so a
+baseline stays accurate even after the folder has been opened normally (which
+clears the server-side new flag). Omit `since` only on the first call of a
+session — without it, the server falls back to its own new-message flag.
+
+Messages are returned **oldest first** and capped at `limit`. When `has_more` is
+`true`, poll again immediately using the returned `highest_id` as the next
+`since`; this way a truncated response is resumed without skipping anything.
+
+**Drafts, Sent Items and Deleted Items always return an empty result**, flagged
+with `"excluded": true`. Mail never arrives in those folders — they hold what the
+user put there — and because `since` matches on message id alone, a draft that was
+just saved or a message that was just sent would otherwise be reported as newly
+arrived mail. The `since` value is echoed back as `highest_id` so a caller
+sweeping every folder does not have to special-case them or reset its cursor.
+
+#### GET `/WorldClientAPI/messages/{folder_id}/new`
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `since` | number | No | Return only messages with an id greater than this. Defaults to `0`, which falls back to the server's new-message flag. |
+| `limit` | number | No | Maximum messages to return. Default `10`, maximum `50`. Values outside the range are clamped. |
+
+**Example Request**
+
+```http
+GET /WorldClientAPI?session={session_id}&route=messages&folder={folder_id}&new_messages=1&since={message_id}&limit={number}
+```
+
+```http
+GET /WorldClientAPI/messages/{folder_id}/new?session={session_id}&since={message_id}&limit={number}
+```
+
+**Success Response** - `200 OK`
+
+`messages` entries use the same shape as [All Messages](#all-messages), with an
+added `folder` on each message so results from several folders can be merged into
+one list. `permissions` is folder-level, as it is for the paged routes.
+
+```json
+{
+  "folder_id": 0,
+  "highest_id": 8842,
+  "has_more": false,
+  "counts": {
+    "messages": 1904,
+    "unread": 12,
+    "new": 3
+  },
+  "permissions": {
+    "can_read": true,
+    "can_create": true,
+    "can_insert": true,
+    "can_edit": true,
+    "can_write": true,
+    "can_delete": true,
+    "can_mark_seen": true
+  },
+  "messages": []
+}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `folder_id` | number | The folder polled |
+| `highest_id` | number | Highest message id returned. Use as the next `since` |
+| `has_more` | boolean | More matches remain beyond `limit`; poll again with the new `since` |
+| `counts` | object | Folder totals after the merge |
+| `permissions` | object | Folder-level permissions, as on the paged routes |
+| `messages` | array | Newly arrived messages, oldest first |
+| `excluded` | boolean | Present and `true` only for Drafts, Sent Items and Deleted Items, which never return messages |
+
+**Error Response**
+
+```json
+{
+  "error": "InvalidParameter",
+  "parameter": "folder"
 }
 ```
 
@@ -1401,6 +1509,98 @@ snooze={snooze_until}
 
 ---
 
+### Background Actions
+
+Perform a message action on a folder the user is not currently viewing.
+
+The standard POST actions above change the session's current folder as a side
+effect, which resets the current page to 1 and discards any active search. That
+is harmless when the user is looking at the folder being acted on, and
+destructive when they are not — a background poller acting on one folder would
+silently throw away the search the user has running in another.
+
+This route performs the same actions without that side effect. It does **not**
+change the current folder, page or search criteria, and it does not clear the
+folder's new-message flag. It is intended for UI that acts on messages outside
+the folder currently on screen; pair it with
+[New Messages](#new-messages) for polling.
+
+Send exactly one action member per request. If more than one is present, the
+first match in the order listed below wins.
+
+Permissions are enforced per action against the target folder: `read` requires
+seen access, `flagged`, `categories` and `snooze` require write access, and
+`delete` and `spam` require delete access. A message id that does not belong to
+`{folder_id}` is ignored.
+
+#### POST `/WorldClientAPI/messages/{folder_id}/background`
+
+**Parameters**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `ids` | number or array | Yes | Message id, or array of message ids, to act on |
+| `read` | boolean | No | `true` marks seen, `false` marks unseen. No read confirmation is sent — matching the behavior of marking read from the message list |
+| `flagged` | boolean | No | `true` flags, `false` unflags |
+| `categories` | string or array | No | Replaces the categories on each message. An array is joined with commas |
+| `snooze` | string | No | ISO-8601 date to snooze until, or `"0"` to unsnooze |
+| `spam` | boolean | No | `true` reports as junk and deletes, `false` reports as not junk |
+| `delete` | boolean | No | `true` deletes. Honors the user's `UseIMAPDelete` and `MarkDeletedMessagesAsRead` settings; deleting from Trash removes permanently |
+
+**Example Request**
+
+```http
+POST /WorldClientAPI?session={session_id}&route=messages&folder={folder_id}&background_action=1
+```
+
+```http
+POST /WorldClientAPI/messages/{folder_id}/background?session={session_id}
+```
+
+```json
+{
+  "ids": [8842, 8843],
+  "read": true
+}
+```
+
+**Success Response** - `200 OK`
+
+`counts` reflects the folder after the action, so a caller polling this route can
+refresh an unread badge without a second request.
+
+```json
+{
+  "success": true,
+  "affected": 2,
+  "folder_id": 0,
+  "counts": {
+    "messages": 1904,
+    "unread": 10,
+    "new": 1
+  }
+}
+```
+
+**Error Responses**
+
+```json
+{
+  "error": "InvalidParameter",
+  "parameter": "ids"
+}
+```
+
+```json
+{
+  "error": "InvalidRequest"
+}
+```
+
+Returned when no supported action member is present.
+
+---
+
 ### Recall
 
 Recall a sent message.
@@ -1697,6 +1897,7 @@ See [How to upload files](uploads.md).
   "messages": [
     {
       "success": boolean,
+      "id": number,
       "subject": string,
       "name": string
     }
@@ -1721,6 +1922,7 @@ Or for failed uploads:
 | Field | Type | Description |
 |-------|------|-------------|
 | `messages[].success` | boolean | Import succeeded |
+| `messages[].id` | number | ID of the imported message in the destination folder |
 | `messages[].subject` | string | Subject of imported message |
 | `messages[].name` | string | Name of uploaded file |
 | `messages[].fail` | string | Error message for failed upload |
@@ -1776,12 +1978,16 @@ import=message
 ```json
 {
   "success": true,
+  "id": number,
+  "folder": number,
   "subject": string
 }
 ```
 
 | Field | Type | Description |
 |-------|------|-------------|
+| `id` | number | ID of the imported message |
+| `folder` | number | ID of the folder it was imported to (always the Inbox) |
 | `subject` | string | Subject of imported message |
 
 **Error Response**

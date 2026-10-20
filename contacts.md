@@ -184,7 +184,7 @@ address_book={address_book_name or folder_id}
 | `emails` | object | Email addresses |
 | `name_details` | object | Name components |
 | `categories` | string | Comma delimited list |
-| `web_addresses` | array | Web addresses with type ("business", "home") |
+| `web_addresses` | array | Web addresses with type ("business", "personal"). On save, an entry with any other type is ignored |
 | `company` | string | Company name |
 | `title` | string | Job title |
 | `office` | string | Office location |

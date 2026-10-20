@@ -339,6 +339,27 @@ GET /WorldClientAPI/events/{folder_id}?session={session_id}&start={start_date}&e
 
 Get the array of external calendar links attached to a given calendar.
 
+> **How importing works (as of 26.5.0)**
+>
+> The server does not download a subscribed `ics` feed while handling your
+> request. Downloads run on a background thread, and a request imports whatever
+> has already been fetched while queuing a fresh copy for next time.
+>
+> This means the **first** import request for a feed - including the first one
+> after adding a link - normally imports nothing and answers with
+> `"pending": true`. The events from the previous import are left in place. Send
+> the same request again after a short delay (about 15 seconds is enough for a
+> healthy feed) to pick up the new copy.
+>
+> Only the two routes that import can return `pending`:
+> [Import From External Calendar Links](#import-from-external-calendar-links)
+> and [Update External Calendar Link](#update-external-calendar-link). Reading
+> the link list, adding a link, and deleting a link never do, because none of
+> them import.
+>
+> `pending` is additive - a client that ignores it still works, its calendar is
+> just refreshed one polling cycle later than before.
+
 **Success Response**
 
 ```json
@@ -1040,6 +1061,18 @@ available_days={object}
 
 Imports/Reimports the `ics` files to the given calendar from all external calendar links. Returns an array of `errors` that has any links which failed to import. Failed imports could have expired links, or errors in the ics file.
 
+Feeds are downloaded on a background thread, so a request imports only what has
+already been fetched - see [External Calendar Links](#external-calendar-links).
+When at least one link is still being downloaded the response carries
+`"pending": true` and nothing was imported for that link on this call; repeat
+the request after a short delay.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `externalCalendars` | array | The subscribed links. Present whether or not anything was imported, so do **not** treat a non-empty array as proof of an import - check `pending` first. |
+| `pending` | boolean | Present and `true` only when at least one link is still downloading. Absent otherwise. |
+| `errors` | array | Links that failed to import. |
+
 **Success Response**
 
 ```json
@@ -1052,6 +1085,16 @@ Imports/Reimports the `ics` files to the given calendar from all external calend
     "can_write": boolean,
     "can_remove": boolean
   }
+}
+```
+
+If a link is still downloading:
+
+```json
+{
+  "externalCalendars": [...],
+  "permissions": {...},
+  "pending": true
 }
 ```
 
@@ -1474,6 +1517,12 @@ uri={external_calendar_link}
 
 Edits a single external calendar link by the index in the array of external calendar links.
 
+Changing a link's `uri` re-imports the calendar, so this route reimports like
+[Import From External Calendar Links](#import-from-external-calendar-links) does
+- and like that route it can answer `"pending": true` while the new link is
+still being downloaded. The new `uri` is saved either way; only the import
+waits. See [External Calendar Links](#external-calendar-links).
+
 **Parameters**
 
 | Parameter | Type | Required | Description |
@@ -1494,6 +1543,17 @@ Edits a single external calendar link by the index in the array of external cale
     "can_write": boolean,
     "can_delete": boolean
   }
+}
+```
+
+If the new link is still downloading:
+
+```json
+{
+  "success": true,
+  "externalCalendars": [...],
+  "permissions": {...},
+  "pending": true
 }
 ```
 
